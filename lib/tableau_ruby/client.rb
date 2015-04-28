@@ -55,7 +55,9 @@ module Tableau
     def setup_connection
       @conn = Faraday.new(url: @host) do |f|
         f.request :url_encoded
-        f.response :logger
+        if ENV['FARADAY_DEBUG']
+          f.response :logger
+        end
         f.adapter Faraday.default_adapter
         f.headers['Content-Type'] = 'application/xml'
       end
