@@ -10,7 +10,7 @@ module Tableau
     def all(params={})
       return { error: "user_id is missing." } if params[:user_id].nil? || params[:user_id].empty?
 
-      resp = @client.conn.get "/api/2.0/sites/#{@client.site_id}/users/#{params[:user_id]}/workbooks" do |req|
+      resp = @client.conn.get "/api/2.0/sites/#{@client.site_id}/users/#{params[:user_id]}/workbooks?pageSize=1000" do |req|
         req.params['getThumbnails'] = params[:include_images] if params[:include_images]
         req.params['isOwner'] = params[:is_owner] || false
         req.headers['X-Tableau-Auth'] = @client.token if @client.token
