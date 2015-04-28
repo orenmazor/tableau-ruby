@@ -27,7 +27,7 @@ module Tableau
           projects: @projects
         }
       end
-      data.to_json
+      data
     end
 
     def find_by(params={})
