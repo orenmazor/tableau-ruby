@@ -6,7 +6,7 @@ require 'mocha/setup'
 class TableauTest < Minitest::Test
   def setup
     @client = Tableau::Client.new(host: ENV['TABLEAU_URL'], admin_name: ENV['TABLEAU_ADMIN_USER'], admin_password: ENV['TABLEAU_ADMIN_PASSWORD'])
-    debugger
-    @admin_user = @client.users.find_by(ENV['TABLEAU_ADMIN_USER'])
+    @site = @client.sites.find_by(name: ENV['TABLEAU_DEFAULT_SITE'])
+    # @admin_user = @client.users.find_by(ENV['TABLEAU_ADMIN_USER'])
   end
 end
