@@ -3,6 +3,7 @@ $:.unshift File.dirname(__FILE__)
 require 'nokogiri'
 require 'faraday'
 require 'faraday_middleware'
+require 'oj'
 
 require 'tableau_ruby/util/configuration'
 
