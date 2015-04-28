@@ -5,18 +5,15 @@ module Tableau
       @client = client
     end
 
-    def all(params={})
-      resp = @client.conn.get "/api/2.0/sites" do |req|
-        req.params['includeProjects'] = params[:include_projects]
+    def all
+      resp = @client.conn.get "/api/2.0/sites/#{@client.site_id}/projects" do |req|
         req.headers['X-Tableau-Auth'] = @client.token if @client.token
       end
-      @projects = {projects: []}
-      Nokogiri::XML(resp.body).css("tsResponse sites site").each do |s|
-        s.css("project").each do |p|
-          @projects[:projects] << {id: p["id"], name: p["name"]}
-        end
+      projects = {projects: []}
+      Nokogiri::XML(resp.body).css("tsResponse projects project").each do |s|
+        projects[:projects] << {id: s["id"], name: s["name"]}
       end
-      @projects.to_json
+      projects
     end
 
     def create(project)
