@@ -1,10 +1,52 @@
 require 'base64'
+require 'securerandom'
 
 module Tableau
   class Workbook
 
     def initialize(client)
       @client = client
+    end
+
+    def create(params)
+      raise "Missing workbook file!" unless params[:file_path]
+      raise "Missing site-id" unless params[:site_id]
+      raise "Missing workbook name" unless params[:workbook_name]
+      raise "Missing project id" unless params[:project_id]
+      raise "Missing admin password" unless params[:admin_password]
+      raise "Missing admin username" unless params[:admin_username]
+
+      builder = Nokogiri::XML::Builder.new do |xml|
+        xml.tsRequest do
+          xml.workbook(name: params[:workbook_name]) do
+            xml.connectionCredentials(name: params[:admin_username], password: params[:admin_password])
+            xml.project(id: params[:project_id])
+          end
+        end
+      end
+
+      multipart_body = <<-BODY
+--boundary-string
+Content-Disposition: name="request_payload"
+Content-Type: text/xml
+
+#{builder.doc.root.to_xml}
+--boundary-string
+Content-Disposition: name="tableau_datasource"; filename="workbook"
+Content-Type: application/octet-stream
+
+#{File.read(params[:file_path])}--boundary-string--
+BODY
+
+      multipart_body.gsub!("\n","\r\n")
+
+      resp = @client.conn.post("/api/2.0/sites/#{params[:site_id]}/workbooks") do |req|
+        req.headers["Content-Type"] = "multipart/mixed; boundary=\"boundary-string\""
+        req.headers['X-Tableau-Auth'] = @client.token if @client.token
+        req.body = multipart_body
+      end
+     
+      resp.status
     end
 
     def all(params={})

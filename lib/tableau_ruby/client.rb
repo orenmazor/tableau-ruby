@@ -1,3 +1,5 @@
+require 'logger'
+
 module Tableau
   class Client
     attr_reader :conn, :host, :admin_name, :projects, :sites, :site_id, :site_name, :token, :user, :users, :workbooks
@@ -56,7 +58,7 @@ module Tableau
       @conn = Faraday.new(url: @host) do |f|
         f.request :url_encoded
         if ENV['FARADAY_DEBUG']
-          f.response :logger
+          f.response :logger, ::Logger.new(STDOUT),bodies: true
         end
         f.adapter Faraday.default_adapter
         f.headers['Content-Type'] = 'application/xml'
