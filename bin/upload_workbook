@@ -2,7 +2,17 @@
 require 'tableau_ruby'
 
 client = Tableau::Client.new
-# project_id = args[0]
 
-puts "uploading to #{project_id}"
+#maybe they gave us the project name
+project = client.projects.find_by(name: ARGV[0])
+if project
+  puts "found project #{ARGV[0]}"
+  project = project[:id]
+else
+  #if that failed, assume its an id
+  project = ARGV[0]
+end
 
+puts "attempting to upload #{ARGV[2]} as #{ARGV[1]}"
+
+client.workbooks.create(project_id: project, workbook_name: ARGV[1], file_path: ARGV[2])

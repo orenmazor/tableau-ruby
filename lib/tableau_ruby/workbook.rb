@@ -50,7 +50,9 @@ BODY
         req.body = multipart_body
       end
      
-      resp.status
+      raise resp.body if resp.status > 299
+
+      puts resp.body
     end
 
     def all(params={})

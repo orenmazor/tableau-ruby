@@ -39,7 +39,7 @@ class TestWorkbook < TableauTest
 
   def test_workbook_gets_created
     project_id = @client.projects.all[:projects].first[:id]
-    result = @client.workbooks.create(admin_password: ENV['TABLEAU_ADMIN_PASSWORD'], admin_username: ENV['TABLEAU_ADMIN_USER'], project_id: project_id, workbook_name: "fooboy", site_id: @client.site_id, file_path: "/tmp/foo.twb")
+    result = @client.workbooks.create(admin_password: ENV['TABLEAU_ADMIN_PASSWORD'], admin_username: ENV['TABLEAU_ADMIN_USER'], project_id: project_id, workbook_name: "fooboy", site_id: @client.site_id, file_path: File.dirname(__FILE__) + "/TestWorkbook.twb")
 
     assert_equal 200, result, "tableau workbook creation returns 200"
   end
