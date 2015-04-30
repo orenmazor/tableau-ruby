@@ -6,9 +6,9 @@ module Tableau
 
     #{username, user_id, password, site}
     def initialize(args={})
-      @host = args[:host] || Tableau.host
-      @admin_name = args[:admin_name] || Tableau.admin_name
-      @admin_password = args[:admin_password] || Tableau.admin_password
+      @host = args[:host] || Tableau.host || ENV['TABLEAU_URL']
+      @admin_name = args[:admin_name] || Tableau.admin_name || ENV['TABLEAU_ADMIN_USER']
+      @admin_password = args[:admin_password] || Tableau.admin_password || ENV['TABLEAU_ADMIN_PASSWORD']
       @site_name = args[:site_name] || ENV['TABLEAU_DEFAULT_SITE'] || "Default"
 
       setup_connection
