@@ -8,7 +8,11 @@ module Tableau
       @client = client
     end
 
-    def create(params)
+    def create(params = {})
+      params[:site_id] ||= @client.site_id
+      params[:admin_password] ||= ENV['TABLEAU_ADMIN_PASSWORD']
+      params[:admin_username] ||= ENV['TABLEAU_ADMIN_USER']
+
       raise "Missing workbook file!" unless params[:file_path]
       raise "Missing site-id" unless params[:site_id]
       raise "Missing workbook name" unless params[:workbook_name]
