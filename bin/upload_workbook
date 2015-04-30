@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+require 'tableau_ruby'
+
+client = Tableau::Client.new
+# project_id = args[0]
+
+puts "uploading to #{project_id}"
+
