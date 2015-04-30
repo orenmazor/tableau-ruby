@@ -7,8 +7,13 @@ class TestUsers < TableauTest
     assert all_users[:users].size() > 0
   end
 
+  def test_user_find_by_id
+    admin_user = @client.users.find_by(id: @admin_user[:id])
+    assert_equal @admin_user, admin_user
+  end
+
   def test_user_find_by_name
-    admin_user = @client.users.find_by(user_name: ENV['TABLEAU_ADMIN_USER'])
+    admin_user = @client.users.find_by(name: ENV['TABLEAU_ADMIN_USER'])
     assert_equal admin_user[:name], ENV['TABLEAU_ADMIN_USER']
     assert admin_user[:id]
   end

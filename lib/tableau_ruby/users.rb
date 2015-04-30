@@ -37,7 +37,13 @@ module Tableau
       #needs pagination support
       all_users = all(params)[:users]
 
-      return all_users.select {|u| u[:name] == params[:user_name] }.first
+      if params[:id]
+        return all_users.select {|u| u[:id] == params[:id] }.first
+      elsif params[:name]
+        return all_users.select {|u| u[:name] == params[:name] }.first
+      else
+        raise "You need :id or :name"
+      end
     end
 
     def create(user)
