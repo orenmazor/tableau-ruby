@@ -14,11 +14,7 @@ module Tableau
       params[:admin_username] ||= ENV['TABLEAU_ADMIN_USER']
 
       raise "Missing workbook file!" unless params[:file_path]
-      raise "Missing site-id" unless params[:site_id]
       raise "Missing project id" unless params[:project_id]
-      raise "Missing admin password" unless params[:admin_password]
-      raise "Missing admin username" unless params[:admin_username]
-
 
       workbook_file = params[:file_path].split("/").last 
 

@@ -24,7 +24,7 @@ module Tableau
 
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.tsRequest do
-          xml.datasource(name: filename.gsub(".tds","")) do
+          xml.datasource(name: filename.gsub(".tds","").gsub(" ", "")) do
             xml.project(id: params[:project_id])
           end
         end
