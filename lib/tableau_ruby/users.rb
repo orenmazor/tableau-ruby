@@ -7,6 +7,32 @@ module Tableau
       @client = client
     end
 
+    def create(options)
+      site_id = options[:site_id] || @client.site_id
+
+      return { error: "name is missing." }.to_json unless options[:name]
+
+      builder = Nokogiri::XML::Builder.new do |xml|
+        xml.tsRequest do
+          xml.user(
+            name: options[:name],
+            siteRole: "Interactor"
+          )
+        end
+      end
+
+      resp = @client.conn.post "/api/2.0/sites/#{site_id}/users" do |req|
+        req.body = builder.to_xml
+        req.headers['X-Tableau-Auth'] = @client.token if @client.token
+      end
+
+      raise resp.body if resp.status > 299
+
+      Nokogiri::XML(resp.body).css("tsResponse user").each do |s|
+        return s["id"]
+      end
+    end
+
     def all(params={})
       site_id = @client.site_id
 
@@ -46,46 +72,6 @@ module Tableau
       end
     end
 
-    def create(user)
-      return { error: "name is missing." }.to_json unless user[:name]
-
-      builder = Nokogiri::XML::Builder.new do |xml|
-        xml.tsRequest do
-          xml.user(
-            name: user[:name] || 'New User',
-            role: user[:role] || true,
-            publish: user[:publish] || true,
-            contentAdmin: user[:content_admin] || false,
-            suppressGettingStarted: user[:storage_quota] || false
-          )
-        end
-      end
-
-      resp = @client.conn.post "/api/2.0/sites/#{user[:site_id]}/users" do |req|
-        req.body = builder.to_xml
-        req.headers['X-Tableau-Auth'] = @client.token if @client.token
-      end
-      if resp.status == 201
-        normalize_json(resp.body, user[:site_id])
-      else
-        {error: { status: resp.status, message: resp.body }}.to_json
-      end
-    end
-
-    def delete(user)
-      return { error: "site_id is missing." }.to_json unless user[:site_id]
-      return { error: "user id is missing." }.to_json unless user[:id]
-
-      resp = @client.conn.delete "/api/2.0/sites/#{user[:site_id]}/users/#{user[:id]}" do |req|
-        req.headers['X-Tableau-Auth'] = @client.token if @client.token
-      end
-
-      if resp.status == 204
-        {success: 'User successfully deleted.'}.to_json
-      else
-        {errors: resp.status}.to_json
-      end
-    end
 
     private
 
