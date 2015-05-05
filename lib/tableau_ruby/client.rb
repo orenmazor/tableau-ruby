@@ -2,7 +2,7 @@ require 'logger'
 
 module Tableau
   class Client
-    attr_reader :conn, :host, :admin_name, :projects, :sites, :site_id, :site_name, :token, :user, :users, :workbooks
+    attr_reader :conn, :host, :admin_name, :projects, :sites, :site_id, :site_name, :token, :user, :users, :workbooks, :datasources
 
     #{username, user_id, password, site}
     def initialize(args={})
@@ -52,6 +52,7 @@ module Tableau
       @projects  = Tableau::Project.new(self)
       @sites     = Tableau::Site.new(self)
       @workbooks = Tableau::Workbook.new(self)
+      @datasources = Tableau::Datasources.new(self)
     end
 
     def setup_connection

@@ -14,9 +14,9 @@ module Tableau
       params[:admin_password] ||= ENV['TABLEAU_ADMIN_PASSWORD']
       params[:admin_username] ||= ENV['TABLEAU_ADMIN_USER']
 
-      raise "Missing workbook file!" unless params[:file_path]
+      raise "Missing datasource file!" unless params[:file_path]
       raise "Missing site-id" unless params[:site_id]
-      raise "Missing workbook name" unless params[:workbook_name]
+      raise "Missing datasource name" unless params[:datasource_name]
       raise "Missing project id" unless params[:project_id]
       raise "Missing admin password" unless params[:admin_password]
       raise "Missing admin username" unless params[:admin_username]
@@ -38,7 +38,7 @@ Content-Type: text/xml
 
 #{payload}
 --boundary-string
-Content-Disposition: name="tableau_datasource"; filename="foobar.twb"
+Content-Disposition: name="tableau_datasource"; filename="foobar.tds"
 Content-Type: application/octet-stream
 
 #{File.read(params[:file_path])}
@@ -59,15 +59,11 @@ BODY
     end
 
     def all(params={})
-      return { error: "user_id is missing." } if params[:user_id].nil? || params[:user_id].empty?
-
-      resp = @client.conn.get "/api/2.0/sites/#{@client.site_id}/users/#{params[:user_id]}/workbooks?pageSize=1000" do |req|
-        req.params['getThumbnails'] = params[:include_images] if params[:include_images]
-        req.params['isOwner'] = params[:is_owner] || false
+      resp = @client.conn.get "/api/2.0/sites/#{@client.site_id}/datasources?pageSize=1000" do |req|
         req.headers['X-Tableau-Auth'] = @client.token if @client.token
       end
 
-      data = {workbooks: [], pagination: {}}
+      data = {datasources: [], pagination: {}}
       doc = Nokogiri::XML(resp.body)
 
       doc.css("pagination").each do |p|
@@ -76,16 +72,9 @@ BODY
         data[:pagination][:total_available] = p['totalAvailable']
       end
 
-      doc.css("workbook").each do |w|
-        workbook = {id: w["id"], name: w["name"]}
-
-        if params[:include_images]
-          resp = @client.conn.get("/api/2.0/sites/#{@client.site_id}/workbooks/#{w['id']}/previewImage") do |req|
-            req.headers['X-Tableau-Auth'] = @client.token if @client.token
-          end
-          workbook[:image] = Base64.encode64(resp.body)
-          workbook[:image_mime_type] = "image/png"
-        end
+      puts resp.body
+      doc.css("datasource").each do |w|
+        workbook = {id: w["id"], name: w["name"], type: w['type']}
 
         w.css('project').each do |p|
           workbook[:project] = {id: p['id'], name: p['name']}
@@ -95,11 +84,7 @@ BODY
           (workbook[:tags] ||=[]) << t['id']
         end
 
-        if params[:include_views]
-          workbook[:views] = include_views(site_id: @client.site_id, id: w['id'])
-        end
-
-        data[:workbooks] << workbook
+        data[:datasources] << workbook
       end
       data
     end
