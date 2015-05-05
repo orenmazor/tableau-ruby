@@ -13,6 +13,6 @@ else
   project = ARGV[0]
 end
 
-puts "attempting to upload #{ARGV[2]} as #{ARGV[1]}"
+puts "attempting to upload #{ARGV[1]}"
 
-client.workbooks.create(project_id: project, workbook_name: ARGV[1], file_path: ARGV[2])
+client.workbooks.create(project_id: project, file_path: ARGV[1])

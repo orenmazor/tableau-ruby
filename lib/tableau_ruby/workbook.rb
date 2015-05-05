@@ -15,15 +15,16 @@ module Tableau
 
       raise "Missing workbook file!" unless params[:file_path]
       raise "Missing site-id" unless params[:site_id]
-      raise "Missing workbook name" unless params[:workbook_name]
       raise "Missing project id" unless params[:project_id]
       raise "Missing admin password" unless params[:admin_password]
       raise "Missing admin username" unless params[:admin_username]
 
 
+      workbook_file = params[:file_path].split("/").last 
+
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.tsRequest do
-          xml.workbook(name: params[:workbook_name]) do
+          xml.workbook(name: workbook_file.gsub(".twb", "")) do
             xml.project(id: params[:project_id])
           end
         end
@@ -37,7 +38,7 @@ Content-Type: text/xml
 
 #{payload}
 --boundary-string
-Content-Disposition: name="tableau_workbook"; filename="foobar.twb"
+Content-Disposition: name="tableau_workbook"; filename="#{workbook_file}"
 Content-Type: application/octet-stream
 
 #{File.read(params[:file_path])}
