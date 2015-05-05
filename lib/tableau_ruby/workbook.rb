@@ -20,26 +20,28 @@ module Tableau
       raise "Missing admin password" unless params[:admin_password]
       raise "Missing admin username" unless params[:admin_username]
 
+
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.tsRequest do
           xml.workbook(name: params[:workbook_name]) do
-            xml.connectionCredentials(name: params[:admin_username], password: params[:admin_password])
             xml.project(id: params[:project_id])
           end
         end
       end
 
+      payload = builder.doc.root.to_xml#(:save_with => Nokogiri::XML::Node::SaveOptions::AS_XML)
       multipart_body = <<-BODY
 --boundary-string
 Content-Disposition: name="request_payload"
 Content-Type: text/xml
 
-#{builder.doc.root.to_xml}
+#{payload}
 --boundary-string
-Content-Disposition: name="tableau_datasource"; filename="workbook"
+Content-Disposition: name="tableau_workbook"; filename="foobar.twb"
 Content-Type: application/octet-stream
 
-#{File.read(params[:file_path])}--boundary-string--
+#{File.read(params[:file_path])}
+--boundary-string--
 BODY
 
       multipart_body.gsub!("\n","\r\n")
