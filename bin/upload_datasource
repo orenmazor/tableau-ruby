@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+require 'tableau_ruby'
+
+client = Tableau::Client.new
+
+#maybe they gave us the project name
+project = client.projects.find_by(name: ARGV[0])
+if project
+  puts "found project #{ARGV[0]}"
+  project = project[:id]
+else
+  #if that failed, assume its an id
+  project = ARGV[0]
+end
+
+puts "attempting to upload #{ARGV[2]} as #{ARGV[1]}"
+
+client.datasources.create(project_id: project, datasource_name: ARGV[1], file_path: ARGV[2])
