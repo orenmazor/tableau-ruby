@@ -16,15 +16,15 @@ module Tableau
 
       raise "Missing datasource file!" unless params[:file_path]
       raise "Missing site-id" unless params[:site_id]
-      raise "Missing datasource name" unless params[:datasource_name]
       raise "Missing project id" unless params[:project_id]
       raise "Missing admin password" unless params[:admin_password]
       raise "Missing admin username" unless params[:admin_username]
 
+      filename = params[:file_path].split("/").last
 
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.tsRequest do
-          xml.datasource(name: params[:datasource_name]) do
+          xml.datasource(name: filename.gsub(".tds","")) do
             xml.project(id: params[:project_id])
           end
         end
@@ -38,7 +38,7 @@ Content-Type: text/xml
 
 #{payload}
 --boundary-string
-Content-Disposition: name="tableau_datasource"; filename="foobar.tds"
+Content-Disposition: name="tableau_datasource"; filename="#{filename}"
 Content-Type: application/octet-stream
 
 #{File.read(params[:file_path])}
@@ -48,6 +48,7 @@ BODY
       multipart_body.gsub!("\n","\r\n")
 
       resp = @client.conn.post("/api/2.0/sites/#{params[:site_id]}/datasources") do |req|
+        req.params["overwrite"] = true
         req.headers["Content-Type"] = "multipart/mixed; boundary=\"boundary-string\""
         req.headers['X-Tableau-Auth'] = @client.token if @client.token
         req.body = multipart_body
