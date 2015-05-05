@@ -55,7 +55,7 @@ BODY
      
       raise resp.body if resp.status > 299
 
-      puts resp.body
+      true
     end
 
     def all(params={})
@@ -72,7 +72,6 @@ BODY
         data[:pagination][:total_available] = p['totalAvailable']
       end
 
-      puts resp.body
       doc.css("datasource").each do |w|
         workbook = {id: w["id"], name: w["name"], type: w['type']}
 
@@ -90,52 +89,14 @@ BODY
     end
 
     def find(params)
-      resp = @client.conn.get "/api/2.0/sites/#{params[:site_id]}/workbooks/#{params[:workbook_id]}" do |req|
-        req.params['previewImage'] = params[:preview_images] if params[:preview_images]
-        req.headers['X-Tableau-Auth'] = @client.token if @client.token
+
+      all_ds = all
+
+      if params[:name]
+        return all_ds[:datasources].select {|x| x[:name] == params[:name]}.first
+      elsif params[:id]
+        return all_ds[:datasources].select {|x| x[:id] == params[:id]}.first
       end
-
-      data = {}
-      Nokogiri::XML(resp.body).css("workbook").each do |w|
-
-        wkbk = {id: w["id"], name: w["name"], description: w['description']}
-
-        if params[:include_views]
-          wkbk[:views] = include_views(site_id: params[:site_id], id: params[:workbook_id])
-        end
-
-        data = wkbk
-      end
-
-      data
     end
-
-    # TODO: Refactor this is duplicate in all method. Also, there are many, many places that are begging to be DRYer.
-    def preview_image(workbook)
-      resp = @client.conn.get("/api/2.0/sites/#{params[:site_id]}/workbooks/#{workbook[:id]}/previewImage") do |req|
-        req.headers['X-Tableau-Auth'] = @client.token if @client.token
-      end
-
-      data = {}
-      data[:image] = Base64.encode64(resp.body)
-      data[:image_mime_type] = "image/png"
-
-      data.to_json
-    end
-
-    private
-
-    def include_views(params)
-      resp = @client.conn.get("/api/2.0/sites/#{params[:site_id]}/workbooks/#{params[:id]}/views") do |req|
-        req.headers['X-Tableau-Auth'] = @client.token if @client.token
-      end
-
-      Nokogiri::XML(resp.body).css("view").each do |v|
-        (@views ||= []) << {id: v['id'], name: v['name']}
-      end
-
-      @views
-    end
-
   end
 end
