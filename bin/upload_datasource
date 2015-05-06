@@ -15,4 +15,7 @@ end
 
 puts "attempting to upload #{ARGV[1]}"
 
-client.datasources.create(project_id: project, file_path: ARGV[1])
+db_user = ENV["TABLEAU_DB_USER"]
+db_pass = ENV["TABLEAU_DB_PASS"]
+
+client.datasources.create(project_id: project, file_path: ARGV[1], db_pass: db_pass, db_user: db_user)

@@ -15,4 +15,7 @@ end
 
 puts "attempting to upload #{ARGV[1]}"
 
-client.workbooks.create(project_id: project, file_path: ARGV[1])
+db_user = ENV["TABLEAU_DB_USER"]
+db_pass = ENV["TABLEAU_DB_PASS"]
+
+client.workbooks.create(project_id: "1a17c7dc-363f-4035-acec-01b77eba4077", file_path: ARGV[1], db_user: db_user, db_pass: db_pass)

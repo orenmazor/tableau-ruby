@@ -11,20 +11,20 @@ module Tableau
 
     def create(params = {})
       params[:site_id] ||= @client.site_id
-      params[:admin_password] ||= ENV['TABLEAU_ADMIN_PASSWORD']
-      params[:admin_username] ||= ENV['TABLEAU_ADMIN_USER']
+      db_user = params[:db_user]
+      db_pass = params[:db_pass]
+
 
       raise "Missing datasource file!" unless params[:file_path]
       raise "Missing site-id" unless params[:site_id]
       raise "Missing project id" unless params[:project_id]
-      raise "Missing admin password" unless params[:admin_password]
-      raise "Missing admin username" unless params[:admin_username]
 
       filename = params[:file_path].split("/").last
 
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.tsRequest do
           xml.datasource(name: filename.gsub(".tds","").gsub(" ", "")) do
+            xml.connectionCredentials(name: db_user, password: db_pass, embed: true)
             xml.project(id: params[:project_id])
           end
         end

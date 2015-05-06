@@ -10,8 +10,8 @@ module Tableau
 
     def create(params = {})
       params[:site_id] ||= @client.site_id
-      params[:admin_password] ||= ENV['TABLEAU_ADMIN_PASSWORD']
-      params[:admin_username] ||= ENV['TABLEAU_ADMIN_USER']
+      db_user = params[:db_user]
+      db_pass = params[:db_pass]
 
       raise "Missing workbook file!" unless params[:file_path]
       raise "Missing project id" unless params[:project_id]
@@ -21,6 +21,7 @@ module Tableau
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.tsRequest do
           xml.workbook(name: workbook_file.gsub(".twb", "")) do
+            xml.connectionCredentials(name: db_user, password: db_pass)
             xml.project(id: params[:project_id])
           end
         end
