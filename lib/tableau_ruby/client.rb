@@ -71,7 +71,7 @@ module Tableau
         xml.tsRequest do
           xml.credentials(name: @admin_name, password: @admin_password) do
             xml.user(name: user) if user
-            xml.site(contentUrl: @site_name)
+            xml.site(contentUrl: "")
           end
         end
       end
